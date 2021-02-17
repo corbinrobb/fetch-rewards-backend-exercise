@@ -6,6 +6,6 @@ const server = express();
 
 server.use(express.json());
 
-server.use("/payer", payerRouter);
+server.use("/", payerRouter);
 
 module.exports = server;
