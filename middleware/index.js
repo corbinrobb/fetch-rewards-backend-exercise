@@ -1,5 +1,6 @@
 const Payers = require("../payer/payer-model");
 
+// Middleware to verify transaction request body is correct
 const verifyTransaction = async (req, res, next) => {
   const { payer, points, timestamp } = req.body;
 
@@ -30,6 +31,7 @@ const verifyTransaction = async (req, res, next) => {
   next();
 };
 
+// Middleware to verify points request body is correct
 const verifyPoints = async (req, res, next) => {
   const pointsToSpend = req.body.points;
 

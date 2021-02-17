@@ -58,37 +58,51 @@ const spendPoints = async (pointsToSpend) => {
   const spentTransactions = {};
 
   for (const transaction of sortedTransactions) {
+    // Check if pointsToSpend is greater than or equal to transaction points
     if (pointsToSpend >= transaction.points) {
       pointsToSpend += -transaction.points;
+
+      // Add payer and points spent values to spentTransactions
       if (transaction.payer in spentTransactions) {
         spentTransactions[transaction.payer] =
           spentTransactions[transaction.payer] - transaction.points;
       } else {
         spentTransactions[transaction.payer] = -transaction.points;
       }
+
+      // Remove Transaction because all points were spent
       await removeTransaction(transaction.id);
+
+      // Runs when transaction points wont be entirely taken up by pointsToSpend
     } else {
+      // Add payer and points spent values to spentTransactions
       if (transaction.payer in spentTransactions) {
         spentTransactions[transaction.payer] =
           spentTransactions[transaction.payer] - pointsToSpend;
       } else {
         spentTransactions[transaction.payer] = -pointsToSpend;
       }
+
+      // Updates transaction in database to reflect points spent
       await updateTransactionPoints(
         transaction.points - pointsToSpend,
         transaction.id
       );
+
+      // Update points to spend and end loop
       pointsToSpend = 0;
       break;
     }
   }
 
+  // Turns spentTransactions object into array of objects
   const arrayFromObject = Object.entries(spentTransactions).map(
     ([payer, points]) => {
       return { payer, points };
     }
   );
 
+  // Return final array
   return arrayFromObject;
 };
 
