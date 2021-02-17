@@ -35,10 +35,61 @@ const addTransaction = async (transaction) => {
   return await db("transactions").where({ id });
 };
 
+const updateTransactionPoints = async (points, id) => {
+  await db("transactions").where({ id }).update({ points });
+  return await db("transactions").where({ id });
+};
+
+const removeTransaction = async (id) => {
+  const transaction = await db("transactions").where({ id });
+  await db("transactions").where({ id }).del();
+  return transaction;
+};
+
 const addPayer = async (payerTitle) => {
   const [id] = await db("payers").insert({ id: payerTitle });
 
   return await db("payers").where({ id });
+};
+
+const spendPoints = async (pointsToSpend) => {
+  const sortedTransactions = await getAllTransactionsSorted();
+
+  const spentTransactions = {};
+
+  for (const transaction of sortedTransactions) {
+    if (pointsToSpend >= transaction.points) {
+      pointsToSpend += -transaction.points;
+      if (transaction.payer in spentTransactions) {
+        spentTransactions[transaction.payer] =
+          spentTransactions[transaction.payer] - transaction.points;
+      } else {
+        spentTransactions[transaction.payer] = -transaction.points;
+      }
+      await removeTransaction(transaction.id);
+    } else {
+      if (transaction.payer in spentTransactions) {
+        spentTransactions[transaction.payer] =
+          spentTransactions[transaction.payer] - pointsToSpend;
+      } else {
+        spentTransactions[transaction.payer] = -pointsToSpend;
+      }
+      await updateTransactionPoints(
+        transaction.points - pointsToSpend,
+        transaction.id
+      );
+      pointsToSpend = 0;
+      break;
+    }
+  }
+
+  const arrayFromObject = Object.entries(spentTransactions).map(
+    ([payer, points]) => {
+      return { payer, points };
+    }
+  );
+
+  return arrayFromObject;
 };
 
 module.exports = {
@@ -46,5 +97,7 @@ module.exports = {
   getAllPointTotals,
   getAllTransactionsSorted,
   addTransaction,
+  updateTransactionPoints,
   addPayer,
+  spendPoints,
 };
