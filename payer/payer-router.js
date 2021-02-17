@@ -26,7 +26,7 @@ router.post("/transactions", verifyTransaction, async (req, res) => {
   const transaction = req.transaction;
 
   try {
-    const addedTransaction = await Payers.addTransaction(transaction);
+    const [addedTransaction] = await Payers.addTransaction(transaction);
     res.status(201).json(addedTransaction);
   } catch (error) {
     console.log(error);
