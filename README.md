@@ -22,7 +22,7 @@
 
 - Navigate to root directory in CLI and run `npm install`
 
-- Run `npx knex migrate:latest`
+- Run `npx knex migrate:latest` - *npx NOT npm*
 
 - Make sure PORT 5000 is clear on your machine
 
